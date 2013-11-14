@@ -113,6 +113,19 @@ class ConfigSchema:
 
         return self._parameterByName.get(fullname, None)
 
+    def __len__(self):
+        return len(self.parameters)
+
+    def __iter__(self):
+        for param in self.parameters:
+            yield param
+
+    def __getitem__(self, key):
+        return self.get_parameter(key)
+
+    def __contains__(self, item):
+        return item in self._parameterByName
+
     def __repr__(self):
         return ('<ConfigSchema name=%s version=%s format=%s parameters=%s>' %
                 (self.name, self.version, self.format, self.parameters))
