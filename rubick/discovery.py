@@ -432,7 +432,7 @@ class HostDiscovery(BaseDiscovery):
 
         hostname = client.run(['hostname']).output.strip()
 
-        item = Host(name=hostname)
+        item = HostResource(name=hostname)
         item.id = get_host_id(client)
         item.network_addresses = get_host_network_addresses(client)
 
@@ -1215,7 +1215,7 @@ class OpenstackDiscovery(object):
         # Rebuild model tree
         openstack = Openstack()
 
-        for host in filter(lambda i: isinstance(i, Host), items):
+        for host in filter(lambda i: isinstance(i, HostResource), items):
             openstack.add_host(host)
 
         for service in filter(lambda i: isinstance(i, Service), items):

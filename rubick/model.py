@@ -57,10 +57,10 @@ class Openstack(Resource):
         return components
 
 
-class Host(Resource):
+class HostResource(Resource):
 
     def __init__(self, name):
-        super(Host, self).__init__()
+        super(HostResource, self).__init__()
         self.name = name
         self.components = []
 
@@ -80,7 +80,7 @@ class Host(Resource):
 
     @property
     def all_issues(self):
-        result = super(Host, self).all_issues
+        result = super(HostResource, self).all_issues
 
         for component in self.components:
             result.extend(component.all_issues)
