@@ -22,8 +22,11 @@ class IssueReporter(object):
     def all_issues(self):
         return list(self.issues)
 
+class Resource(IssueReporter):
+    pass
 
-class Openstack(IssueReporter):
+
+class Openstack(Resource):
 
     def __init__(self):
         super(Openstack, self).__init__()
@@ -54,7 +57,7 @@ class Openstack(IssueReporter):
         return components
 
 
-class Host(IssueReporter):
+class Host(Resource):
 
     def __init__(self, name):
         super(Host, self).__init__()
@@ -94,7 +97,7 @@ class ProcessResource(Resource):
         self.cwd = cwd
 
 
-class Service(IssueReporter):
+class Service(Resource):
 
     def __init__(self):
         super(Service, self).__init__()
@@ -392,7 +395,7 @@ class SwiftObjectServerComponent(OpenstackComponent):
     name = 'swift-object-server'
 
 
-class FileResource(IssueReporter):
+class FileResource(Resource):
 
     def __init__(self, path, contents, owner, group, permissions):
         super(FileResource, self).__init__()
