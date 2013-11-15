@@ -85,6 +85,15 @@ class Host(IssueReporter):
         return result
 
 
+class ProcessResource(Resource):
+
+    def __init__(self, pid, cmdline, cwd):
+        super(ProcessResource, self).__init__()
+        self.pid = pid
+        self.cmdline = cmdline
+        self.cwd = cwd
+
+
 class Service(IssueReporter):
 
     def __init__(self):
