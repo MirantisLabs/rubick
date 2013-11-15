@@ -1,4 +1,5 @@
 import os.path
+import stat
 import re
 import logging
 from StringIO import StringIO
@@ -319,9 +320,29 @@ def get_host_network_addresses(client):
     return addresses
 
 
-def permissions_string_to_number(s):
-    # TODO: implement it
-    return 0
+def permissions_string_to_mode(s):
+    mode = 0
+
+    if s[0] == 'd':
+        mode |= stat.S_IFDIR
+    elif s[0] == 's':
+        mode |= stat.S_IFSOCK
+    elif s[0] == 'l':
+        mode |= stat.S_IFLNK
+    else:
+        mode |= stat.S_IFREG
+
+    if s[1] == 'r': mode |= stat.S_IRUSR
+    if s[2] == 'w': mode |= stat.S_IWUSR
+    if s[3] == 'x': mode |= stat.S_IXUSR
+    if s[4] == 'r': mode |= stat.S_IRGRP
+    if s[5] == 'w': mode |= stat.S_IWGRP
+    if s[6] == 'x': mode |= stat.S_IXGRP
+    if s[7] == 'r': mode |= stat.S_IROTH
+    if s[8] == 'w': mode |= stat.S_IWOTH
+    if s[9] == 'x': mode |= stat.S_IXOTH
+
+    return mode
 
 
 def collect_process(client, process_info):
@@ -338,14 +359,14 @@ def collect_process(client, process_info):
 
 
 def collect_file(client, path):
-    ls = client.run(['ls', '-l', '--time-style=full-iso', path])
+    ls = client.run(['ls', '-ld', '--time-style=full-iso', path])
     if ls.return_code != 0:
         return None
 
     line = ls.output.split("\n")[0]
     perm, links, owner, group, size, date, time, timezone, name = \
         line.split()
-    permissions = permissions_string_to_number(perm)
+    permissions = permissions_string_to_mode(perm)
 
     with client.open(path) as f:
         contents = f.read()
