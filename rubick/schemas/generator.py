@@ -70,7 +70,7 @@ def generate_project_schema(project):
         database_file = files[x]
         del files[x]
     else:
-        database_file = os.path.join(project_path, project+'.conf.yml')
+        database_file = os.path.join(project_path, project + '.conf.yml')
 
     schema_records = []
     if os.path.exists(database_file):
@@ -143,7 +143,7 @@ def generate_project_schema(project):
 
         logger.debug('Found %d change(s) from previous version schema' % changes_count)
 
-        if changes_count > int(len(parameters)*DIFF_THRESHOLD):
+        if changes_count > int(len(parameters) * DIFF_THRESHOLD):
             logger.debug('Using full schema update')
 
             new_parameters = parameters.copy()

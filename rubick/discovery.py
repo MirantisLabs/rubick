@@ -352,7 +352,7 @@ def collect_process(client, process_info):
     process = ProcessResource(
         pid=process_info.pid,
         cmdline=process_info.command,
-        cwd = cwd)
+        cwd=cwd)
     process.listen_sockets = get_process_listen_sockets(client, process.pid)
 
     return process

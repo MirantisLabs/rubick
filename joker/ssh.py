@@ -2,6 +2,7 @@ import subprocess
 import shlex
 from os import environ
 
+
 class JokerSecureShell():
 
     def __init__(self, hostName):
@@ -20,10 +21,8 @@ class JokerSecureShell():
             "StrictHostKeyChecking": "no"
         }
 
-
         self.haveMasterSocket = False
         self.masterSocketPid = None
-
 
     # FIXME use inspect.stack()[0][3] ?
     @property
@@ -81,18 +80,17 @@ class JokerSecureShell():
 
         for i in self.options:
             if self.options[i] is not None:
-                r = r + ( '-o %s=%s' % (i, self.options[i]) )
+                r = r + ('-o %s=%s' % (i, self.options[i]))
 
-        return r;
+        return r
 
     def createMasterSocket(self):
         self.haveMasterSocket = True
 
         # XXX we support only keys without password encryption
-        cmd = "ssh -i %s -p %d %s -M -S %s %s@%s" % (self.key, self.port, self.sshOptions, self.masterSocketPath, self.user, self.host)
+        # cmd = "ssh -i %s -p %d %s -M -S %s %s@%s" % (self.key, self.port, self.sshOptions, self.masterSocketPath, self.user, self.host)
 
         #subprocess.Popen(shlex.split(cmd))
-
 
     def call(self, destinationCmd):
         if (not self.haveMasterSocket):
@@ -103,7 +101,3 @@ class JokerSecureShell():
        #stdout = stderr = None
 
         #exitCode = subprocess.call(shlex.split(destinationCmd), stdout = stdout, stderr = stderr)
-
-
-
-

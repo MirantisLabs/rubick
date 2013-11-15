@@ -22,6 +22,7 @@ class IssueReporter(object):
     def all_issues(self):
         return list(self.issues)
 
+
 class Resource(IssueReporter):
     pass
 
