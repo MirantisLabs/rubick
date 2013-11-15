@@ -374,6 +374,19 @@ def collect_file(client, path):
     return FileResource(path, contents, owner, group, permissions)
 
 
+def collect_directory(client, path):
+    ls = client.run(['ls', '-ld', '--time-style=full-iso', path])
+    if ls.return_code != 0:
+        return None
+
+    line = ls.output.split("\n")[0]
+    perm, links, owner, group, size, date, time, timezone, name = \
+        line.split()
+    permissions = permissions_string_to_mode(perm)
+
+    return DirectoryResource(path, owner, group, permissions)
+
+
 def collect_component_configs(client, component,
                               command, default_config=None):
     config_files = []
@@ -478,6 +491,61 @@ class HostDiscovery(BaseDiscovery):
     def seen(self, driver, host, **data):
         item = find(self._seen_items, lambda h: host in h.network_addresses)
         return item is not None
+
+
+class FileSystemDiscovery(BaseDiscovery):
+
+    def seen(self, driver, host, path=None, **data):
+        if not path:
+            return True
+
+        client = driver.client(host)
+        host_id = get_host_id(client)
+
+        item = find(self._seen_items,
+                    lambda f: f.path == path and f.host_id == host_id)
+
+        return item is not None
+
+
+class FileDiscovery(FileSystemDiscovery):
+    item_type = 'file'
+
+    def discover(self, driver, host, path=None, **data):
+        client = driver.client(host)
+
+        if not path:
+            return None
+
+        item = collect_file(client, path)
+        if not item:
+            return None
+
+        item.host_id = get_host_id(client)
+
+        self._seen_items.append(item)
+
+        return item
+
+
+class DirectoryDiscovery(FileSystemDiscovery):
+    item_type = 'directory'
+
+    def discover(self, driver, host, path=None, **data):
+        client = driver.client(host)
+
+        if not path:
+            return None
+
+        item = collect_directory(client, path)
+        if not item:
+            return None
+
+        item.host_id = get_host_id(client)
+
+        self._seen_items.append(item)
+
+        return item
 
 
 class ServiceDiscovery(BaseDiscovery):
@@ -601,6 +669,14 @@ class NovaApiDiscovery(ServiceDiscovery):
         config_dir = '/etc/nova'
         if len(nova_api.config_files) > 0:
             config_dir = os.path.dirname(nova_api.config_files[0].path)
+
+        for param in nova_api.config.schema:
+            if param.type == 'file':
+                path = nova_api.config[param.name]
+                driver.enqueue('file', host=host, path=path)
+            elif param.type == 'directory':
+                path = nova_api.config[param.name]
+                driver.enqueue('directory', host=host, path=path)
 
         paste_config_path = path_relative_to(
             nova_api.config['api_paste_config'], config_dir)
@@ -1221,8 +1297,19 @@ class OpenstackDiscovery(object):
         for service in filter(lambda i: isinstance(i, Service), items):
             host = find(openstack.hosts, lambda h: h.id == service.host_id)
             if not host:
+                logger.error('Got resource "%s" '
+                             'that belong to non-existing host' % service)
                 continue
 
             host.add_component(service)
+
+        for fs_resource in filter(lambda f: isinstance(f, FileSystemResource), items):
+            host = find(openstack.hosts, lambda h: h.id == fs_resource.host_id)
+            if not host:
+                logger.error('Got resource "%s" '
+                             'that belong to non-existing host' % fs_resource)
+                continue
+
+            host.add_fs_resource(fs_resource)
 
         return openstack

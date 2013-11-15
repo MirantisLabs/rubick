@@ -63,6 +63,7 @@ class HostResource(Resource):
         super(HostResource, self).__init__()
         self.name = name
         self.components = []
+        self.filesystem = {}
 
     def __str__(self):
         return 'Host "%s"' % self.name
@@ -73,6 +74,13 @@ class HostResource(Resource):
 
         self.components.append(component)
         component.parent = self
+
+    def add_fs_resource(self, resource):
+        if not resource:
+            return
+
+        self.filesystem[resource.path] = resource
+        resource.parent = self
 
     @property
     def openstack(self):
@@ -395,15 +403,34 @@ class SwiftObjectServerComponent(OpenstackComponent):
     name = 'swift-object-server'
 
 
-class FileResource(Resource):
-
-    def __init__(self, path, contents, owner, group, permissions):
-        super(FileResource, self).__init__()
+class FileSystemResource(Resource):
+    def __init__(self, path, owner, group, permissions):
+        super(FileSystemResource, self).__init__()
         self.path = path
-        self.contents = contents
         self.owner = owner
         self.group = group
         self.permissions = permissions
 
     def __str__(self):
-        return 'File "%s"' % self.path
+        return '%s "%s"' % (
+            self.__class__.__name__.split('.')[-1].replace('Resource', ''),
+            self.path)
+
+    def __repr__(self):
+        return (
+            '%s(path=%s, owner=%s, group=%s, permissions=%s)' %
+            (self.__class__.__name__.split('.')[-1], repr(self.path),
+             repr(self.owner), repr(self.group), repr(self.permissions))
+        )
+
+
+class FileResource(FileSystemResource):
+
+    def __init__(self, path, contents, owner, group, permissions):
+        super(FileResource, self).__init__(
+            path, owner, group, permissions)
+        self.contents = contents
+
+
+class DirectoryResource(FileSystemResource):
+    pass
