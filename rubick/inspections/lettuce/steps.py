@@ -113,9 +113,8 @@ def nova_authtoken_property_assertion(self, name, values):
 
         (authtoken_section, _) = find(
             nova.paste_config.items(),
-            lambda name_values: name_values[0].startswith('filter:')
-            and name_values[1].get('paste.filter_factory') ==
-                                AUTHTOKEN_FILTER_FACTORY
+            lambda name_values: name_values[0].startswith('filter:') and
+                                name_values[1].get('paste.filter_factory') == AUTHTOKEN_FILTER_FACTORY
         )
 
         if not authtoken_section:

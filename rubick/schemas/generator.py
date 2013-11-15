@@ -11,7 +11,7 @@ from rubick.schema import TypeValidatorRegistry as TypeRegistry
 from rubick.schemas.yaml_utils import yaml_string, yaml_value
 
 
-DIFF_THRESHOLD=0.5
+DIFF_THRESHOLD = 0.5
 
 
 logger = logging.getLogger('rubick.schemas.generator')
@@ -180,7 +180,7 @@ def generate_project_schema(project):
                     continue
 
                 extra_data = [(k, v) for k, v in old_param.items()
-                                if k not in ['name', 'type', 'default', 'help']]
+                              if k not in ['name', 'type', 'default', 'help']]
                 param.update(extra_data)
 
                 validator = TypeRegistry.get_validator(old_param['type'])
@@ -198,7 +198,7 @@ def generate_project_schema(project):
                         param['default'] = value
                     else:
                         logger.error("In project '%s' version %s default value for parameter '%s' is not valid value of type %s: %s" %
-                                        (project, schema['version'], param['name'], param['type'], repr(param['default'])))
+                                     (project, schema['version'], param['name'], param['type'], repr(param['default'])))
 
                 if param.get('default', None) != old_param.get('default', None):
                     param['comment'] = 'Default value has changed'
@@ -219,7 +219,6 @@ def generate_project_schema(project):
 
         for name in new_schema_record.get('removed', []):
             del parameters[name]
-
 
     schema_records = sorted(schema_records,
                             key=lambda r: Version(r['version']))
